@@ -1,0 +1,318 @@
+{% extends 'base.html' %} {% block content %}
+        <a
+          href="{% url 'toggle_status' customer_record.id %}"
+          class="btn btn-info"
+        >
+          {% if customer_record.is_active %}
+            Deactivate
+          {% else %}
+            Activate
+          {% endif %}
+        </a>
+          {{ customer_record.first_name }} {{ customer_record.last_name }}
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p>
+              <strong>Email:</strong>
+              <a href="mailto:{{ customer_record.email }}"
+                >{{ customer_record.email }}</a
+              >
+            <a
+              href="{% url 'toggle_status' customer_record.id %}"
+              class="btn btn-secondary btn-block w-100"
+            >
+              {% if customer_record.is_active %}
+                🔴 Deactivate
+              {% else %}
+                🟢 Activate
+              {% endif %}
+            </a>
+            </p>
+            <p>
+              <strong>Job Title:</strong> {{
+              customer_record.job_title|default:"N/A" }}
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Address:</strong> {{ customer_record.address }}</p>
+            <p>
+              <strong>City:</strong> {{ customer_record.city }}, {{
+              customer_record.state }} {{ customer_record.zipcode }}
+            </p>
+            <p>
+              <strong>Customer Type:</strong>
+              <span class="badge bg-info"
+                >{{ customer_record.get_customer_type_display }}</span
+              >
+            </p>
+            <p>
+              <strong>Status:</strong>
+              {% if customer_record.is_active %}
+              <span class="badge bg-success">Active</span>
+              {% else %}
+              <span class="badge bg-danger">Inactive</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        {% if customer_record.notes %}
+        <hr />
+        <div class="bg-light p-3 rounded">
+          <h6><strong>Notes:</strong></h6>
+          <p>{{ customer_record.notes }}</p>
+        </div>
+        {% endif %}
+
+        <hr />
+        <div class="row">
+          <div class="col-md-6">
+            <p>
+              <strong>Created At:</strong> {{ customer_record.created_at|date:"M
+              d, Y H:i" }}
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p>
+              <strong>Last Contacted:</strong>
+              {% if customer_record.last_contacted %} {{
+              customer_record.last_contacted|date:"M d, Y H:i" }} {% else %}
+              Never {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'home' %}" class="btn btn-secondary">Back</a>
+        <a
+          href="{% url 'update_record' customer_record.id %}"
+          class="btn btn-warning"
+          >Edit Record</a
+        >
+        <a
+          href="{% url 'toggle_status' customer_record.id %}"
+          class="btn btn-info"
+        >
+          {% if customer_record.is_active %}
+            Deactivate
+          {% else %}
+            Activate
+          {% endif %}
+        </a>
+        <a
+          href="{% url 'delete_record' customer_record.id %}"
+          class="btn btn-danger"
+          onclick="return confirm('Are you sure?');"
+          >Delete</a
+        >
+      </div>
+    </div>
+
+    <!-- Call History Section -->
+    <div class="card mb-4">
+      <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0">
+          Call History
+          <a
+            href="{% url 'add_call' customer_record.id %}"
+            class="btn btn-sm btn-primary"
+            style="float: right"
+            >+ Add Call</a
+          >
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if call_history %}
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Duration</th>
+                <th>Date/Time</th>
+                <th>Notes</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for call in call_history %}
+              <tr>
+                <td>
+                  <span class="badge bg-info"
+                    >{{ call.get_call_type_display }}</span
+                  >
+                </td>
+                <td>{{ call.duration_seconds }}s</td>
+                <td>{{ call.called_at|date:"M d, Y H:i" }}</td>
+                <td>{{ call.notes|truncatewords:5|default:"No notes" }}</td>
+                <td>
+                  <a
+                    href="{% url 'delete_call' call.id customer_record.id %}"
+                    class="btn btn-sm btn-danger"
+                    onclick="return confirm('Delete this call?');"
+                    >Delete</a
+                  >
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No calls recorded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Email Section -->
+    <div class="card mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">
+          Email History
+          <a
+            href="{% url 'add_email' customer_record.id %}"
+            class="btn btn-sm btn-warning"
+            style="float: right"
+            >+ Log Email</a
+          >
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if emails %}
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for email in emails %}
+              <tr>
+                <td>
+                  <strong>{{ email.subject }}</strong><br />
+                  <small class="text-muted"
+                    >{{ email.body|truncatewords:10 }}</small
+                  >
+                </td>
+                <td>{{ email.sent_at|date:"M d, Y H:i" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No emails recorded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Tasks Section -->
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">
+          Tasks
+          <a
+            href="{% url 'add_task' customer_record.id %}"
+            class="btn btn-sm btn-warning"
+            style="float: right"
+            >+ Add Task</a
+          >
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if tasks %}
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for task in tasks %}
+              <tr>
+                <td>
+                  <strong>{{ task.title }}</strong><br />
+                  {% if task.description %}
+                  <small class="text-muted"
+                    >{{ task.description|truncatewords:10 }}</small
+                  >
+                  {% endif %}
+                </td>
+                <td>{{ task.due_date|date:"M d, Y" }}</td>
+                <td>
+                  {% if task.status == 'pending' %}
+                  <span class="badge bg-warning">Pending</span>
+                  {% elif task.status == 'completed' %}
+                  <span class="badge bg-success">Completed</span>
+                  {% else %}
+                  <span class="badge bg-danger">Cancelled</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a
+                    href="{% url 'delete_task' task.id customer_record.id %}"
+                    class="btn btn-sm btn-danger"
+                    onclick="return confirm('Delete this task?');"
+                    >Delete</a
+                  >
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No tasks created yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card bg-light">
+      <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">Quick Actions</h5>
+      </div>
+      <div class="card-body">
+        <a
+          href="{% url 'add_call' customer_record.id %}"
+          class="btn btn-warning btn-block w-100 mb-2"
+          >📞 Log a Call</a
+        >
+        <a
+          href="{% url 'add_email' customer_record.id %}"
+          class="btn btn-info btn-block w-100 mb-2"
+          >📧 Log an Email</a
+        >
+        <a
+          href="{% url 'add_task' customer_record.id %}"
+          class="btn btn-success btn-block w-100 mb-2"
+          >✓ Create Task</a
+        >
+        <a
+          href="{% url 'update_record' customer_record.id %}"
+          class="btn btn-primary btn-block w-100 mb-2"
+          >✏️ Edit Details</a
+        >
+        <a
+          href="{% url 'toggle_status' customer_record.id %}"
+          class="btn btn-secondary btn-block w-100"
+        >
+          {% if customer_record.is_active %} 🔴 Deactivate {% else %} 🟢
+          Activate {% endif %}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

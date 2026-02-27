@@ -1,0 +1,23 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="col-md-6 offset-md-3">
+  <div class="card">
+    <div class="card-header bg-warning">
+      <h4 class="mb-0">
+        Log a Call - {{ record.first_name }} {{ record.last_name }}
+      </h4>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{% url 'add_call' record.id %}">
+        {% csrf_token %} {{ form.as_p }}
+        <br />
+        <button type="submit" class="btn btn-warning">Log Call</button>
+        <a href="{% url 'record' record.id %}" class="btn btn-secondary"
+          >Back</a
+        >
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
